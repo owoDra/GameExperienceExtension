@@ -5,7 +5,8 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ExperienceDeveloperSettings)
 
 
-FName UExperienceDeveloperSettings::GetCategoryName() const
+UExperienceDeveloperSettings::UExperienceDeveloperSettings()
 {
-	return FName(TEXT("Game Experience Extension"));
+	CategoryName = TEXT("Game XXX / Plugins");
+	SectionName = TEXT("Game Experience Extension");
 }

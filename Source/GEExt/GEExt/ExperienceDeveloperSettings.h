@@ -10,15 +10,12 @@
 /**
  * Developer settings for game experience
  */
-UCLASS(Config = "Game")
+UCLASS(Config = "Game", Defaultconfig, meta = (DisplayName = "Game Experience Extension"))
 class UExperienceDeveloperSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 public:
-	UExperienceDeveloperSettings() {}
-
-public:
-	virtual FName GetCategoryName() const override;
+	UExperienceDeveloperSettings();
 
 public:
 	//

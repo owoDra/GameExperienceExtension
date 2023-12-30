@@ -7,6 +7,6 @@
 
 UExperienceDeveloperSettings::UExperienceDeveloperSettings()
 {
-	CategoryName = TEXT("Game XXX / Plugins");
+	CategoryName = TEXT("Game XXX Extension");
 	SectionName = TEXT("Game Experience Extension");
 }

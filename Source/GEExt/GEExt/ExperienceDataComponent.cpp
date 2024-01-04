@@ -1,4 +1,4 @@
-// Copyright (C) 2023 owoDra
+﻿// Copyright (C) 2023 owoDra
 
 #include "ExperienceDataComponent.h"
 
@@ -58,7 +58,12 @@ void UExperienceDataComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 bool UExperienceDataComponent::CanChangeInitStateToSpawned(UGameFrameworkComponentManager* Manager) const
 {
-	return (GetGameMode<AGameModeBase>() != nullptr);
+	if (HasAuthority())
+	{
+		return (GetGameMode<AGameModeBase>() != nullptr);
+	}
+
+	return true;
 }
 
 bool UExperienceDataComponent::CanChangeInitStateToDataAvailable(UGameFrameworkComponentManager* Manager) const
@@ -88,7 +93,6 @@ void UExperienceDataComponent::TryLoadSuggestedExperienceData()
 
 	if (!HasAuthority())
 	{
-		UE_LOG(LogGEE, Warning, TEXT("TryLoadSuggestedExperienceData failed: Authority is required"));
 		return;
 	}
 
@@ -173,8 +177,10 @@ void UExperienceDataComponent::TryLoadSuggestedExperienceData()
 	
 		SetExperienceData(ExperienceDataId);
 	}
-
-	UE_LOG(LogGEE, Error, TEXT("TryLoadSuggestedExperienceData: Could not find valid ExperienceData"));
+	else
+	{
+		UE_LOG(LogGEE, Error, TEXT("TryLoadSuggestedExperienceData: Could not find valid ExperienceData"));
+	}
 }
 
 void UExperienceDataComponent::SetExperienceData(FPrimaryAssetId ExperienceDataId)
@@ -545,4 +551,12 @@ void UExperienceDataComponent::HandleAllActionsDeactivated()
 {
 	LoadState = EExperienceLoadState::Unloaded;
 	ExperienceData = nullptr;
+}
+
+
+AGameModeBase* UExperienceDataComponent::GetAuthGameMode() const
+{
+	auto* GS{ GetGameStateChecked<AGameStateBase>() };
+
+	return GS->AuthorityGameMode;
 }

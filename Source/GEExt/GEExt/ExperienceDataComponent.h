@@ -1,4 +1,4 @@
-// Copyright (C) 2023 owoDra
+﻿// Copyright (C) 2023 owoDra
 
 #pragma once
 
@@ -149,14 +149,15 @@ public:
 	/** 
 	 * Gets the game mode that owns this component, this will always return null on the client 
 	 */
+	AGameModeBase* GetAuthGameMode() const;
+
 	template <class T>
 	T* GetGameMode() const
 	{
 		// Note: Intentionally getting the game mode from the world instead of the game state as it can be null during game state initialization
 
 		static_assert(TPointerIsConvertibleFromTo<T, AGameModeBase>::Value, "'T' template parameter to GetGameMode must be derived from AGameModeBase");
-		const auto* World{ GetWorld() };
-		return World ? World->GetAuthGameMode<T>() : nullptr;
+		return Cast<T>(GetAuthGameMode());
 	}
 
 };

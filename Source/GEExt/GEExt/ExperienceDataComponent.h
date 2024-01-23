@@ -43,7 +43,7 @@ enum class EExperienceLoadState
 /**
  * Components that manage ExperienceData and initialization state
  */
-UCLASS(meta = (BlueprintSpawnableComponent))
+UCLASS(meta = (BlueprintSpawnableComponent, DisplayName = "Experience Init State Component"))
 class GEEXT_API UExperienceDataComponent : public UInitStateComponent
 {
 	GENERATED_BODY()

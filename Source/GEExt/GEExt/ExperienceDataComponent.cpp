@@ -6,10 +6,13 @@
 #include "ExperienceManagerSubsystem.h"
 #include "ExperienceActionSet.h"
 #include "ExperienceData.h"
-#include "GEEWorldSettings.h"
+#include "WorldOption/WorldOption_DefaultExperience.h"
 #include "GEExtLogs.h"
 
+#include "WorldSetting/GFCWorldSettings.h"
+
 #include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 #include "Engine/AssetManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameModeBase.h"
@@ -34,7 +37,10 @@ void UExperienceDataComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, ExperienceData);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+	Params.Condition = COND_None;
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ExperienceData, Params);
 }
 
 
@@ -154,9 +160,9 @@ void UExperienceDataComponent::TryLoadSuggestedExperienceData()
 
 	if (!ExperienceDataId.IsValid())
 	{
-		if (const auto* TypedWorldSettings{ Cast<AGEEWorldSettings>(World->GetWorldSettings()) })
+		if (const auto* WorldOption{ AGFCWorldSettings::GetOptionFromWorld<UWorldOption_DefaultExperience>(World) })
 		{
-			ExperienceDataId = TypedWorldSettings->GetDefaultExperienceData();
+			ExperienceDataId = WorldOption->GetDefaultExperienceData();
 			ExperienceDataIdSource = TEXT("WorldSettings");
 		}
 	}
@@ -173,13 +179,13 @@ void UExperienceDataComponent::TryLoadSuggestedExperienceData()
 
 	if (ExperienceDataId.IsValid())
 	{
-		UE_LOG(LogGEE, Log, TEXT("TryLoadSuggestedExperienceData: Suggested ExperienceDataId(%s) by %s"), *ExperienceDataId.ToString(), *ExperienceDataIdSource);
+		UE_LOG(LogGameExt_Experience, Log, TEXT("TryLoadSuggestedExperienceData: Suggested ExperienceDataId(%s) by %s"), *ExperienceDataId.ToString(), *ExperienceDataIdSource);
 	
 		SetExperienceData(ExperienceDataId);
 	}
 	else
 	{
-		UE_LOG(LogGEE, Error, TEXT("TryLoadSuggestedExperienceData: Could not find valid ExperienceData"));
+		UE_LOG(LogGameExt_Experience, Error, TEXT("TryLoadSuggestedExperienceData: Could not find valid ExperienceData"));
 	}
 }
 
@@ -214,6 +220,8 @@ void UExperienceDataComponent::SetExperienceData(FPrimaryAssetId ExperienceDataI
 
 	ExperienceData = NewExperienceData;
 
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ExperienceData, this);
+
 	Step1_LoadExperienceAssets();
 }
 
@@ -228,7 +236,7 @@ void UExperienceDataComponent::Step1_LoadExperienceAssets()
 	check(ExperienceData);
 	check(LoadState == EExperienceLoadState::Unloaded);
 
-	UE_LOG(LogGEE, Log, TEXT("[%s] Start load experience from ExperienceData(%s)"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), *ExperienceData->GetPrimaryAssetId().ToString());
+	UE_LOG(LogGameExt_Experience, Log, TEXT("[%s] Start load experience from ExperienceData(%s)"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), *ExperienceData->GetPrimaryAssetId().ToString());
 
 	// Change current load state to "LoadingAssets"
 
@@ -300,7 +308,7 @@ void UExperienceDataComponent::Step2_LoadExperienceGameFeatures()
 	check(ExperienceData);
 	check(LoadState == EExperienceLoadState::LoadingAssets);
 
-	UE_LOG(LogGEE, Log, TEXT("[%s] Start load GameFeatures by ExperienceData(%s)"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), *ExperienceData->GetPrimaryAssetId().ToString());
+	UE_LOG(LogGameExt_Experience, Log, TEXT("[%s] Start load GameFeatures by ExperienceData(%s)"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), *ExperienceData->GetPrimaryAssetId().ToString());
 
 	// Change current load state to "LoadingGameFeatures"
 
@@ -324,7 +332,7 @@ void UExperienceDataComponent::Step2_LoadExperienceGameFeatures()
 				}
 				else
 				{
-					UE_LOG(LogGEE, Error, TEXT("Step2_LoadExperienceGameFeatures: Failed to find plugin URL from PluginName(%s) from ExperienceDat(%s)"),
+					UE_LOG(LogGameExt_Experience, Error, TEXT("Step2_LoadExperienceGameFeatures: Failed to find plugin URL from PluginName(%s) from ExperienceDat(%s)"),
 						*PluginName, *Context->GetPrimaryAssetId().ToString());
 				}
 			}
@@ -363,7 +371,7 @@ void UExperienceDataComponent::Step3_TryTestRandomDelay()
 	check(ExperienceData);
 	check(LoadState == EExperienceLoadState::LoadingGameFeatures);
 
-	UE_LOG(LogGEE, Log, TEXT("[%s] Start try test random delay only with editor while loading experience of ExperienceData(%s)"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), *ExperienceData->GetPrimaryAssetId().ToString());
+	UE_LOG(LogGameExt_Experience, Log, TEXT("[%s] Start try test random delay only with editor while loading experience of ExperienceData(%s)"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), *ExperienceData->GetPrimaryAssetId().ToString());
 
 	// Change current load state to "LoadingTestingDelay"
 
@@ -390,7 +398,7 @@ void UExperienceDataComponent::Step4_ExecuteGameFeatureActions()
 	check(ExperienceData);
 	check(LoadState == EExperienceLoadState::LoadingTestingDelay);
 
-	UE_LOG(LogGEE, Log, TEXT("[%s] Execute GameFeatureActions in ExperienceData(%s)"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), *ExperienceData->GetPrimaryAssetId().ToString());
+	UE_LOG(LogGameExt_Experience, Log, TEXT("[%s] Execute GameFeatureActions in ExperienceData(%s)"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), *ExperienceData->GetPrimaryAssetId().ToString());
 
 	// Change current load state to "ExecutingActions"
 
@@ -442,7 +450,7 @@ void UExperienceDataComponent::Step5_CompleteLoadExperience()
 	check(ExperienceData);
 	check(LoadState == EExperienceLoadState::ExecutingActions);
 
-	UE_LOG(LogGEE, Log, TEXT("[%s] Completed loading of Experience by ExperienceData(%s)"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), *ExperienceData->GetPrimaryAssetId().ToString());
+	UE_LOG(LogGameExt_Experience, Log, TEXT("[%s] Completed loading of Experience by ExperienceData(%s)"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), *ExperienceData->GetPrimaryAssetId().ToString());
 
 	// Change current load state to "Loaded"
 
@@ -489,7 +497,7 @@ void UExperienceDataComponent::DeactivateExperience()
 
 		// Deactivate and unload the actions
 
-		auto Context{ FGameFeatureDeactivatingContext(FSimpleDelegate::CreateUObject(this, &ThisClass::HandleActionDeactivationCompleted)) };
+		auto Context{ FGameFeatureDeactivatingContext(TEXT(""), [this](FStringView) { this->HandleActionDeactivationCompleted(); }) };
 
 		if (const auto* ExistingWorldContext{ GEngine->GetWorldContextFromWorld(GetWorld()) })
 		{
@@ -524,7 +532,7 @@ void UExperienceDataComponent::DeactivateExperience()
 
 		if (NumExpectedPausers > 0)
 		{
-			UE_LOG(LogGEE, Error, TEXT("Actions that have asynchronous deactivation aren't fully supported yet in ExperienceData"));
+			UE_LOG(LogGameExt_Experience, Error, TEXT("Actions that have asynchronous deactivation aren't fully supported yet in ExperienceData"));
 		}
 
 		if (NumExpectedPausers == NumObservedPausers)

@@ -4,6 +4,10 @@
 
 #include "GameFeatureAction.h"
 
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ExperienceActionSet)
 
 
@@ -16,22 +20,22 @@ UExperienceActionSet::UExperienceActionSet(const FObjectInitializer& ObjectIniti
 
 
 #if WITH_EDITOR
-EDataValidationResult UExperienceActionSet::IsDataValid(TArray<FText>& ValidationErrors)
+EDataValidationResult UExperienceActionSet::IsDataValid(FDataValidationContext& Context) const
 {
-	auto Result{ CombineDataValidationResults(Super::IsDataValid(ValidationErrors), EDataValidationResult::Valid) };
+	auto Result{ CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid) };
 
 	auto EntryIndex{ 0 };
 	for (const auto& Action : Actions)
 	{
 		if (Action)
 		{
-			Result = CombineDataValidationResults(Result, Action->IsDataValid(ValidationErrors));
+			Result = CombineDataValidationResults(Result, Action->IsDataValid(Context));
 		}
 		else
 		{
 			Result = CombineDataValidationResults(Result, EDataValidationResult::Invalid);
 
-			ValidationErrors.Add(FText::Format(LOCTEXT("ActionEntryIsNull", "Null entry at index {0} in Actions"), FText::AsNumber(EntryIndex)));
+			Context.AddError(FText::Format(LOCTEXT("ActionEntryIsNull", "Null entry at index {0} in Actions"), FText::AsNumber(EntryIndex)));
 		}
 
 		++EntryIndex;

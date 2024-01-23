@@ -4,6 +4,10 @@
 
 #include "GameFeatureAction.h"
 
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ExperienceData)
 
 
@@ -16,22 +20,22 @@ UExperienceData::UExperienceData(const FObjectInitializer& ObjectInitializer)
 
 
 #if WITH_EDITOR
-EDataValidationResult UExperienceData::IsDataValid(TArray<FText>& ValidationErrors)
+EDataValidationResult UExperienceData::IsDataValid(FDataValidationContext& Context) const
 {
-	auto Result{ CombineDataValidationResults(Super::IsDataValid(ValidationErrors), EDataValidationResult::Valid) };
+	auto Result{ CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid) };
 
 	auto EntryIndex{ 0 };
 	for (const auto& Action : Actions)
 	{
 		if (Action)
 		{
-			Result = CombineDataValidationResults(Result, Action->IsDataValid(ValidationErrors));
+			Result = CombineDataValidationResults(Result, Action->IsDataValid(Context));
 		}
 		else
 		{
 			Result = CombineDataValidationResults(Result, EDataValidationResult::Invalid);
 
-			ValidationErrors.Add(FText::Format(LOCTEXT("ActionEntryIsNull", "Null entry at index {0} in Actions"), FText::AsNumber(EntryIndex)));
+			Context.AddError(FText::Format(LOCTEXT("ActionEntryIsNull", "Null entry at index {0} in Actions"), FText::AsNumber(EntryIndex)));
 		}
 
 		++EntryIndex;
@@ -53,7 +57,7 @@ EDataValidationResult UExperienceData::IsDataValid(TArray<FText>& ValidationErro
 
 		if (FirstNativeParent != ParentClass)
 		{
-			ValidationErrors.Add(FText::Format(LOCTEXT("ExperienceInheritenceIsUnsupported", "Blueprint subclasses of Blueprint experiences is not currently supported (use composition via ActionSets instead). Parent class was {0} but should be {1}."), 
+			Context.AddError(FText::Format(LOCTEXT("ExperienceInheritenceIsUnsupported", "Blueprint subclasses of Blueprint experiences is not currently supported (use composition via ActionSets instead). Parent class was {0} but should be {1}."),
 				FText::AsCultureInvariant(GetPathNameSafe(ParentClass)),
 				FText::AsCultureInvariant(GetPathNameSafe(FirstNativeParent))
 			));

@@ -2,4 +2,4 @@
 
 #include "GEExtLogs.h"
 
-DEFINE_LOG_CATEGORY(LogGEE);
+DEFINE_LOG_CATEGORY(LogGameExt_Experience);

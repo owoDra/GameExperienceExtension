@@ -14,7 +14,7 @@ class UExperienceActionSet;
  * Data assets that define the game experience in game mode
  */
 UCLASS(BlueprintType, Const)
-class UExperienceData : public UPrimaryDataAsset
+class GEEXT_API UExperienceData : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 public:

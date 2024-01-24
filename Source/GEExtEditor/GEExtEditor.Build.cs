@@ -11,7 +11,9 @@ public class GEExtEditor : ModuleRules
 		PublicIncludePaths.AddRange(
 			new string[] 
             {
-			}
+                ModuleDirectory,
+                ModuleDirectory + "/GEExtEditor",
+            }
 		);
 		
 		PublicDependencyModuleNames.AddRange(
@@ -29,6 +31,8 @@ public class GEExtEditor : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+                "AssetTools", 
+
                 "GEExt",
             }
 		);

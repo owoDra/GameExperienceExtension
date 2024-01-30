@@ -124,8 +124,6 @@ protected:
 protected:
 	void DeactivateExperience();
 
-	void DeactivateListOfActions(struct FGameFeatureDeactivatingContext& Context, const TArray<class UGameFeatureAction*>& ActionList);
-
 	void HandleActionDeactivationCompleted();
 	void HandleAllActionsDeactivated();
 

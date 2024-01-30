@@ -1,4 +1,4 @@
-// Copyright (C) 2024 owoDra
+﻿// Copyright (C) 2024 owoDra
 
 #include "ExperienceActionSet.h"
 
@@ -10,8 +10,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ExperienceActionSet)
 
-
-#define LOCTEXT_NAMESPACE "Experience"
+//////////////////////////////////////////////////////////////////////////
 
 UExperienceActionSet::UExperienceActionSet(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -35,11 +34,15 @@ EDataValidationResult UExperienceActionSet::IsDataValid(FDataValidationContext& 
 		{
 			Result = CombineDataValidationResults(Result, EDataValidationResult::Invalid);
 
-			Context.AddError(FText::Format(LOCTEXT("ActionEntryIsNull", "Null entry at index {0} in Actions"), FText::AsNumber(EntryIndex)));
+			Context.AddError(FText::FromString(FString::Printf(TEXT("Invalid Action defined in Actions[%d] in %s"), EntryIndex, *GetNameSafe(this))));
 		}
 
 		++EntryIndex;
 	}
+
+#if WITH_EDITORONLY_DATA
+	PrimaryAssetId = GetIdentifierString();
+#endif
 
 	return Result;
 }
@@ -60,4 +63,13 @@ void UExperienceActionSet::UpdateAssetBundleData()
 }
 #endif // WITH_EDITORONLY_DATA
 
-#undef LOCTEXT_NAMESPACE
+
+FPrimaryAssetId UExperienceActionSet::GetPrimaryAssetId() const
+{
+	return FPrimaryAssetId(FPrimaryAssetType(UExperienceActionSet::NAME_ExperienceActionSetType), GetFName());
+}
+
+FString UExperienceActionSet::GetIdentifierString() const
+{
+	return GetPrimaryAssetId().ToString();
+}

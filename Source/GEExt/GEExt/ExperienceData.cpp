@@ -1,4 +1,4 @@
-// Copyright (C) 2024 owoDra
+﻿// Copyright (C) 2024 owoDra
 
 #include "ExperienceData.h"
 
@@ -10,8 +10,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ExperienceData)
 
-
-#define LOCTEXT_NAMESPACE "Experience"
+//////////////////////////////////////////////////////////////////////////
 
 UExperienceData::UExperienceData(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -35,36 +34,15 @@ EDataValidationResult UExperienceData::IsDataValid(FDataValidationContext& Conte
 		{
 			Result = CombineDataValidationResults(Result, EDataValidationResult::Invalid);
 
-			Context.AddError(FText::Format(LOCTEXT("ActionEntryIsNull", "Null entry at index {0} in Actions"), FText::AsNumber(EntryIndex)));
+			Context.AddError(FText::FromString(FString::Printf(TEXT("Invalid Action defined in Actions[%d] in %s"), EntryIndex, *GetNameSafe(this))));
 		}
 
 		++EntryIndex;
 	}
 
-	// Make sure users didn't subclass from a BP of this (it's fine and expected to subclass once in BP, just not twice)
-
-	if (!GetClass()->IsNative())
-	{
-		auto* ParentClass{ GetClass()->GetSuperClass() };
-
-		// Find the native parent
-
-		auto* FirstNativeParent{ ParentClass };
-		while ((FirstNativeParent != nullptr) && !FirstNativeParent->IsNative())
-		{
-			FirstNativeParent = FirstNativeParent->GetSuperClass();
-		}
-
-		if (FirstNativeParent != ParentClass)
-		{
-			Context.AddError(FText::Format(LOCTEXT("ExperienceInheritenceIsUnsupported", "Blueprint subclasses of Blueprint experiences is not currently supported (use composition via ActionSets instead). Parent class was {0} but should be {1}."),
-				FText::AsCultureInvariant(GetPathNameSafe(ParentClass)),
-				FText::AsCultureInvariant(GetPathNameSafe(FirstNativeParent))
-			));
-
-			Result = CombineDataValidationResults(Result, EDataValidationResult::Invalid);
-		}
-	}
+#if WITH_EDITORONLY_DATA
+	PrimaryAssetId = GetIdentifierString();
+#endif
 
 	return Result;
 }
@@ -85,4 +63,13 @@ void UExperienceData::UpdateAssetBundleData()
 }
 #endif // WITH_EDITORONLY_DATA
 
-#undef LOCTEXT_NAMESPACE
+
+FPrimaryAssetId UExperienceData::GetPrimaryAssetId() const
+{
+	return FPrimaryAssetId(FPrimaryAssetType(UExperienceData::NAME_ExperienceDataType), GetFName());
+}
+
+FString UExperienceData::GetIdentifierString() const
+{
+	return GetPrimaryAssetId().ToString();
+}

@@ -1,4 +1,4 @@
-// Copyright (C) 2024 owoDra
+﻿// Copyright (C) 2024 owoDra
 
 #pragma once
 
@@ -19,14 +19,42 @@ class UExperienceActionSet : public UPrimaryDataAsset
 public:
 	UExperienceActionSet(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	inline static const FName NAME_ExperienceActionSetType{ TEXTVIEW("ExperienceActionSet") };
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// Validate Data
+public:
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-#endif // WITH_EDITOR
+#endif 
 
+	/////////////////////////////////////////////////////////////////////////////////////
+	// Asset Bundle
+public:
 #if WITH_EDITORONLY_DATA
 	virtual void UpdateAssetBundleData() override;
-#endif // WITH_EDITORONLY_DATA
+#endif 
 
+	/////////////////////////////////////////////////////////////////////////////////////
+	// Primary Asset
+protected:
+#if WITH_EDITORONLY_DATA
+	UPROPERTY(VisibleAnywhere, Transient, Category = "Debug")
+	mutable FString PrimaryAssetId;
+#endif
+
+public:
+	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
+
+	/**
+	 * Return PrimaryAssetId as FString
+	 */
+	UFUNCTION(BlueprintCallable)
+	FString GetIdentifierString() const;
+
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// Experience Actions
 public:
 	//
 	// List of Game Feature Plugins this experience wants to have active

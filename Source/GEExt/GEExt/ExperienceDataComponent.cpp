@@ -504,7 +504,7 @@ void UExperienceDataComponent::DeactivateExperience()
 			Context.SetRequiredWorldContextHandle(ExistingWorldContext->ContextHandle);
 		}
 
-		auto DeactivateListOfActions
+		/*auto DeactivateListOfActions
 		{
 			[&Context](const TArray<UGameFeatureAction*>& ActionList)
 			{
@@ -517,14 +517,14 @@ void UExperienceDataComponent::DeactivateExperience()
 					}
 				}
 			}
-		};
+		};*/
 
-		DeactivateListOfActions(ExperienceData->Actions);
+		DeactivateListOfActions(Context, ExperienceData->Actions);
 		for (const auto& ActionSet : ExperienceData->ActionSets)
 		{
-			if (ActionSet != nullptr)
+			if (ActionSet)
 			{
-				DeactivateListOfActions(ActionSet->Actions);
+				DeactivateListOfActions(Context, ActionSet->Actions);
 			}
 		}
 
@@ -540,7 +540,18 @@ void UExperienceDataComponent::DeactivateExperience()
 			HandleAllActionsDeactivated();
 		}
 	}
+}
 
+void UExperienceDataComponent::DeactivateListOfActions(FGameFeatureDeactivatingContext& Context, const TArray<UGameFeatureAction*>& ActionList)
+{
+	/*for (const auto& Action : ActionList)
+	{
+		if (Action)
+		{
+			Action->OnGameFeatureDeactivating(Context);
+			Action->OnGameFeatureUnregistering();
+		}
+	}*/
 }
 
 void UExperienceDataComponent::HandleActionDeactivationCompleted()

@@ -544,14 +544,14 @@ void UExperienceDataComponent::DeactivateExperience()
 
 void UExperienceDataComponent::DeactivateListOfActions(FGameFeatureDeactivatingContext& Context, const TArray<UGameFeatureAction*>& ActionList)
 {
-	/*for (const auto& Action : ActionList)
+	for (const auto& Action : ActionList)
 	{
 		if (Action)
 		{
 			Action->OnGameFeatureDeactivating(Context);
 			Action->OnGameFeatureUnregistering();
 		}
-	}*/
+	}
 }
 
 void UExperienceDataComponent::HandleActionDeactivationCompleted()

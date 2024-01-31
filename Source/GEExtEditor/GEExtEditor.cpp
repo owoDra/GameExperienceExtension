@@ -1,4 +1,4 @@
-// Copyright (C) 2024 owoDra
+﻿// Copyright (C) 2024 owoDra
 
 #include "GEExtEditor.h"
 
@@ -10,8 +10,6 @@
 
 IMPLEMENT_MODULE(FGEExtEditorModule, GEExtEditor)
 
-
-#define LOCTEXT_NAMESPACE "GEExtEditorModule"
 
 void FGEExtEditorModule::StartupModule()
 {
@@ -46,7 +44,7 @@ void FGEExtEditorModule::OnEndPIE(bool bIsSimulating)
 void FGEExtEditorModule::RegisterAssetTypeActionCategory()
 {
 	static const FName CategoryKey{ TEXT("GameGameMode") };
-	static const FText CategoryDisplayName{ LOCTEXT("GameGameModeCategory", "GameMode") };
+	static const FText CategoryDisplayName{ NSLOCTEXT("GameXXX", "GameGameModeCategory", "GameMode") };
 
 	Category = IAssetTools::Get().RegisterAdvancedAssetCategory(CategoryKey, CategoryDisplayName);
 }
@@ -80,5 +78,3 @@ void FGEExtEditorModule::UnregisterAssets(TArray<TSharedPtr<FAssetTypeActions_Ba
 		}
 	}
 }
-
-#undef LOCTEXT_NAMESPACE

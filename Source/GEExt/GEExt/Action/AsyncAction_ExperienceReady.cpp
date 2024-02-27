@@ -1,4 +1,4 @@
-// Copyright (C) 2024 owoDra
+﻿// Copyright (C) 2024 owoDra
 
 #include "AsyncAction_ExperienceReady.h"
 
@@ -26,6 +26,7 @@ UAsyncAction_ExperienceReady* UAsyncAction_ExperienceReady::WaitForExperienceRea
 		auto* Action{ NewObject<UAsyncAction_ExperienceReady>() };
 		Action->WorldPtr = World;
 		Action->RegisterWithGameInstance(World);
+		return Action;
 	}
 
 	return nullptr;
